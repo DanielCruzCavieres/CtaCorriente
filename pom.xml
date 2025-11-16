@@ -59,7 +59,7 @@
         <!--           Testing           -->
         <!-- ========================== -->
 
-        <!-- JUnit 5 (Pruebas unitarias) -->
+        <!-- JUnit 5 -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
@@ -67,7 +67,15 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Selenium (Pruebas UI) -->
+        <!-- JUnit Vintage: permite ejecutar JUnit 4 en JUnit 5 -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Selenium -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
@@ -75,7 +83,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- WebDriverManager (ChromeDriver automático) -->
+        <!-- WebDriverManager -->
         <dependency>
             <groupId>io.github.bonigarcia</groupId>
             <artifactId>webdrivermanager</artifactId>
@@ -83,7 +91,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Cucumber (BDD) -->
+        <!-- Cucumber -->
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-java</artifactId>
@@ -98,7 +106,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit 4 (solo para Runner de Cucumber) -->
+        <!-- JUnit 4 (necesario para @RunWith) -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -139,7 +147,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Surefire Plugin (Corre JUnit + Cucumber en Jenkins) -->
+            <!-- Surefire Plugin (JUnit5 + Cucumber JUnit4 Runner) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
@@ -149,7 +157,7 @@
                     <includes>
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
-                        <include>**/*Runner.java</include> <!-- Cucumber Runner -->
+                        <include>**/*Runner.java</include>
                     </includes>
                 </configuration>
             </plugin>
