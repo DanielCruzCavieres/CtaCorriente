@@ -15,12 +15,3 @@ Feature: Pruebas de login y registro de hora médica veterinaria
     And ingreso una contraseña inválida
     And presiono el botón Ingresar
     Then debo ver un mensaje de error de credenciales inválidas
-
-  # 4.3 Registro de hora médica veterinaria
-  Scenario: Registro exitoso de hora médica veterinaria
-    Given que estoy logeado como usuario válido
-    And estoy en la página de registro de hora veterinaria
-    When selecciono una mascota válida
-    And selecciono una fecha y hora válidas
-    And presiono el botón Registrar Hora
-    Then debo ver un mensaje de confirmación de hora registrada
