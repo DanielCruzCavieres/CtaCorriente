@@ -1,94 +1,88 @@
 package com.platinum.steps;
 
-import static org.junit.Assert.assertTrue;
+import io.cucumber.java.en.*;
+import org.junit.Assert;
+import org.openqa.selenium.*;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import com.platinum.config.DriverFactory;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-
-import io.cucumber.java.After;
-import io.cucumber.java.Before;
-import io.cucumber.java.es.Dado;
-import io.cucumber.java.es.Cuando;
-import io.cucumber.java.es.Entonces;
-import io.github.bonigarcia.wdm.WebDriverManager;
+import java.time.Duration;
 
 public class LoginSteps {
 
-    private WebDriver driver;
+    private final WebDriver driver = DriverFactory.getDriver();
 
-    @Before
-    public void setUp() {
-        WebDriverManager.chromedriver().setup();
-        ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless=new"); // opcional para Jenkins
-        driver = new ChromeDriver(options);
-        driver.manage().window().maximize();
-    }
-
-    @After
-    public void tearDown() {
-        if (driver != null) {
-            driver.quit();
-        }
-    }
-
-    // ========= CASOS 4.1 y 4.2: LOGIN =========
-
-    @Dado("que estoy en la página de login de usuario")
+    // ================================
+    // LOGIN USUARIO - CASO EXITOSO
+    // ================================
+    @Given("que estoy en la página de login de usuario")
     public void que_estoy_en_la_pagina_de_login_de_usuario() {
+        // Ajusta el contexto si es distinto
         driver.get("http://localhost:8080/CtaCorriente/loginUsuario.jsp");
     }
 
-    @Cuando("ingreso un nombre de usuario válido guardado en la BD")
+    @When("ingreso un nombre de usuario válido guardado en la BD")
     public void ingreso_un_nombre_de_usuario_valido_guardado_en_la_bd() {
-        WebElement txtUsuario = driver.findElement(By.name("nombreUsuario"));
-        txtUsuario.clear();
-        txtUsuario.sendKeys("usuarioValido"); // usuario REAL en BD
+        driver.findElement(By.name("nombreUsuario")).sendKeys("admin"); // ajusta según tus datos
     }
 
-    @Cuando("ingreso una contraseña válida")
+    @When("ingreso una contraseña válida")
     public void ingreso_una_contrasena_valida() {
-        WebElement txtPass = driver.findElement(By.name("password"));
-        txtPass.clear();
-        txtPass.sendKeys("claveValida"); // password REAL en BD
+        driver.findElement(By.name("password")).sendKeys("1234"); // ajusta según tus datos
     }
 
-    @Cuando("ingreso un nombre de usuario inválido")
-    public void ingreso_un_nombre_de_usuario_invalido() {
-        WebElement txtUsuario = driver.findElement(By.name("nombreUsuario"));
-        txtUsuario.clear();
-        txtUsuario.sendKeys("usuarioInvalido");
-    }
-
-    @Cuando("ingreso una contraseña inválida")
-    public void ingreso_una_contrasena_invalida() {
-        WebElement txtPass = driver.findElement(By.name("password"));
-        txtPass.clear();
-        txtPass.sendKeys("claveMala");
-    }
-
-    @Cuando("presiono el botón Ingresar")
+    @When("presiono el botón Ingresar")
     public void presiono_el_boton_ingresar() {
-        WebElement btnIngresar = driver.findElement(
-            By.cssSelector("form[action='loginUsuario'] button[type='submit']")
-        );
-        btnIngresar.click();
+        driver.findElement(By.cssSelector("button[type='submit'],input[type='submit']")).click();
     }
 
-    @Entonces("debo ser redirigido al menú de usuario")
+    @Then("debo ser redirigido al menú de usuario")
     public void debo_ser_redirigido_al_menu_de_usuario() {
-        boolean hayError = driver.getPageSource().contains("style=\"color:red\"");
-        assertTrue("Se mostró un error de login, las credenciales no parecen válidas", !hayError);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+        // Espera a que la URL cambie a algo que represente el menú de usuario
+        wait.until(ExpectedConditions.urlContains("menuUsuario"));
+
+        Assert.assertTrue(
+                "No se redirigió correctamente al menú de usuario",
+                driver.getCurrentUrl().contains("menuUsuario")
+        );
     }
 
-    @Entonces("debo ver un mensaje de error de credenciales inválidas")
+    // ================================
+    // LOGIN USUARIO - CASO FALLIDO
+    // ================================
+    @When("ingreso un nombre de usuario inválido")
+    public void ingreso_un_nombre_de_usuario_invalido() {
+        driver.findElement(By.name("nombreUsuario")).clear();
+        driver.findElement(By.name("nombreUsuario")).sendKeys("usuario_inexistente");
+    }
+
+    @When("ingreso una contraseña inválida")
+    public void ingreso_una_contrasena_invalida() {
+        driver.findElement(By.name("password")).clear();
+        driver.findElement(By.name("password")).sendKeys("xxxxxx");
+    }
+
+    @Then("debo ver un mensaje de error de credenciales inválidas")
     public void debo_ver_un_mensaje_de_error_de_credenciales_invalidas() {
-        WebElement mensajeError = driver.findElement(
-            By.cssSelector("p[style*='color:red']")
+
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+
+        // Tus JSP de login muestran el error como:
+        // <p style="color:red;">...</p>
+        WebElement mensajeError = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        By.cssSelector("p[style*='color:red']")
+                )
         );
-        assertTrue(mensajeError.isDisplayed());
+
+        Assert.assertTrue("El mensaje de error no está visible", mensajeError.isDisplayed());
+
+        String texto = mensajeError.getText().toLowerCase();
+        Assert.assertTrue(
+                "El texto del mensaje no contiene referencia a error/credenciales",
+                texto.contains("error") || texto.contains("credenciales")
+        );
     }
 }
